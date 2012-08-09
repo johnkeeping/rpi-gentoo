@@ -1,0 +1,58 @@
+#!/bin/sh
+RPI_ROOT=/mnt/rpi
+
+die() {
+    test $# -gt 0 && echo "$@" >&2
+    exit 1
+}
+
+set -e
+
+test $UID = 0 || die "fatal: not root"
+
+CHOST=armv6j-hardfloat-linux-gnueabi
+ROOT=/usr/$CHOST
+export CHOST ROOT
+
+# Synchronise the GCC shared objects into the target image.
+# This avoids needing to have GCC installed on the target by simply adding
+# all of the files that may be referenced at runtime by programs compiled
+# using GCC.
+rsync -av --include='*.so*' --include='*/' --exclude='*' \
+        --prune-empty-dirs --delete \
+        /usr/lib64/gcc/${CHOST}/ \
+        ${ROOT}/usr/lib/gcc/${CHOST}/
+
+ld_so_conf_gcc=${ROOT}/etc/ld.so.conf.d/05gcc-${CHOST}.conf
+
+gcc_libdir=$(ROOT=/ gcc-config -L)
+old_gcc_libdir=$(cat "$ld_so_conf_gcc" 2>/dev/null)
+
+if test "$gcc_libdir" != "$old_gcc_libdir"
+then
+    echo "$gcc_libdir" >"$ld_so_conf_gcc"
+    env-update
+fi
+
+echo
+mount |grep -q "$RPI_ROOT" || die "fatal: nothing mounted on $RPI_ROOT?"
+
+rsync -av \
+        --exclude=/etc/portage \
+        --exclude=/packages \
+        --exclude=/tmp/portage \
+        --exclude=/usr/include \
+        --exclude=/usr/src/linux \
+        --exclude=/var/db/pkg \
+        --exclude=/var/lib/portage \
+        --exclude=/var/lib/gentoo/news \
+        --filter='protect /etc/rc/***' \
+        --filter='protect /etc/ssh/ssh_host_*' \
+        --filter='protect /home/***' \
+        --filter='protect /lib/rc/cache/***' \
+        --filter='protect /lib/rc/console/***' \
+        --filter='protect /sys/***' \
+        --filter='protect /var/***' \
+        --delete \
+        --delete-excluded \
+        ${ROOT}/ "$RPI_ROOT"/

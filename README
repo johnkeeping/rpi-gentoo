@@ -1,0 +1,17 @@
+Gentoo Cross-Compilation for Raspberry Pi
+=========================================
+
+Quick Start
+-----------
+
+Follow the instructions at http://wiki.gentoo.org/wiki/Raspberry_Pi *ignoring
+the "stage3" and "portage" sections.
+
+Now:
+    $ rm -rf /usr/armv6j-hardfloat-linux-gnueabi/etc/portage
+    $ ln -s /path/to/rpi-gentoo/portage /usr/armv6j-hardfloat-linux-gnueabi/etc/portage
+    $ mkdir -p /usr/armv6j-hardfloat-linux-gnueabi/{usr/src,dev,proc,sys}
+    $ ln -s /path/to/rpi-linux-sources /usr/armv6j-hardfloat-linux-gnueabi/usr/src/linux
+    $ armv6j-hardfloat-linux-gnueabi-emerge @system
+
+And you can use "bin/rpi-sync" to copy the system onto the SD card.

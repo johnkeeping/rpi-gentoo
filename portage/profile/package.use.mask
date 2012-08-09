@@ -1,0 +1,10 @@
+# These use flags cause broken parts of PHP's configure script to run,
+# breaking the entire build.
+dev-lang/php iconv threads
+# "phar" support requires PHP on the build machine.
+dev-lang/php phar
+
+# Git only works with Python 2, which is masked.
+dev-vcs/git python
+
+sys-apps/busybox make-symlinks

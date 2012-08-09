@@ -1,0 +1,61 @@
+pre_src_configure() {
+	ewarn "!!! This ebuild is now ignoring USE flags !!!"
+	ewarn "    Perl doesn't really support cross-compilation, so a fixed"
+	ewarn "    configuration is being used."
+	CROSS_NAME= ./Configure -des -Dprefix=./dummy -Dusefevel || die
+	CROSS_NAME=${SYSROOT%/}
+	CROSS_NAME=${CROSS_NAME##*/}
+
+	make miniperl &&
+	make uudmap.h &&
+	make generate_uudmap
+	rm *.o &&
+	touch generate_uudmap.o &&
+	touch generate_uudmap &&
+	cp "$SYSROOT/etc/portage/patches/dev-lang/perl/config.sh" . || die
+	echo >Cross/config-${CROSS_NAME}.sh
+	CROSS_NAME=$CROSS_NAME CROSSCC=$CC sh Configure -S -f ./config.sh || die
+	cat <<EOF >"${S}/Configure"
+#!/bin/sh
+:
+EOF
+
+	# Override the objects for miniperl (used in the build) so that we
+	# avoid rebuilding it with the cross compiler.
+	# Override generated_pods to avoid building any documentation, since
+	# that requires a full perl that we don't have.
+	EXTRA_EMAKE="mini_obj=" # generated_pods="
+
+	make ${EXTRA_EMAKE} lib/Config.pod || die
+	mkdir -p fake_config_library || die
+	cp lib/Config.pm lib/Config_heavy.pl fake_config_library || die
+	sed -i -e '/@INC/ s:^:#:' -e '/PERL5LIB/ s:^:#:' installperl || die
+	[ -f hostperl ] && die 'update etc/portage/env/dev-lang/perl!!!'
+	cat <<EOF >hostperl
+#!/bin/bash
+PERL5LIB=$(pwd)/fake_config_library
+export PERL5LIB
+args=()
+while test \$# != 0
+do
+	test "\$1" = -Ilib || args+=( "\$1" )
+	shift
+done
+/usr/bin/perl -I$(pwd)/fake_config_library -MConfig "\${args[@]}"
+EOF
+	chmod +x hostperl
+	echo >installman
+	EXTRA_EMAKE="${EXTRA_EMAKE} RUN_PERL=$(pwd)/hostperl"
+	export EXTRA_EMAKE
+}
+
+post_src_configure() {
+	# Do this after src_configure because that's where the ebuild sets
+	# these variable to point at ${EPREFIX}/... but EPREFIX is unset in
+	# our environment - we need to use SYSROOT instead.
+	export BZIP2_INCLUDE=${SYSROOT}/usr/include
+	export BZIP2_LIB=${SYSROOT}/usr/$(get_libdir)
+
+	export ZLIB_INCLUDE=${SYSROOT}/usr/include
+	export ZLIB_LIB=${SYSROOT}/usr/$(get_libdir)
+}

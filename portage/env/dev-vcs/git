@@ -1,0 +1,15 @@
+pre_src_compile() {
+	# Helpfully, the git ebuild overrides PERL_MM_OPT to be empty so we
+	# need to jump through another hoop here by overriding emake to add
+	# the correct value on the end (overriding the earlier incorrect one).
+
+	# To ensure we aren't going to blow everything up, check that emake
+	# is still a separate command and hasn't changed into a shell
+	# function.
+	[ $(type -t emake) == file ] ||
+	die 'File needs updating - emake has changed!'
+
+	emake() {
+		command emake "$@" "PERL_MM_OPT=$PERL_MM_OPT"
+	}
+}

@@ -1,0 +1,28 @@
+_jk_export_cached_values() {
+	while test $# != 0
+	do
+		key=$1
+		shift
+		value=$1
+		shift
+		eval "$key=$value"
+		eval export $key
+	done
+}
+
+
+pre_src_configure() {
+	ewarn "overriding cached configure values!"
+	_jk_export_cached_values i_cv_epoll_works yes \
+				 i_cv_inotify_works yes \
+				 i_cv_posix_fallocate_works yes \
+				 i_cv_mmap_plays_with_write yes \
+				 i_cv_signed_size_t no \
+				 i_cv_gmtime_max_time_t 32 \
+				 i_cv_signed_time_t yes \
+				 i_cv_fd_passing yes \
+				 i_cv_c99_vsnprintf yes \
+				 lib_cv_va_copy yes \
+				 lib_cv___va_copy yes \
+				 lib_cv_va_val_copy yes
+}

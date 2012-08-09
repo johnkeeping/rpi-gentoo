@@ -1,0 +1,4 @@
+# Use a custom xml2-config which passes the correct --prefix value to the
+# real xml2-config.  This ensures that we use the correct include and library
+# paths.
+export ac_cv_php_xml2_config_path="$SYSROOT/etc/portage/scripts/xml2-config"

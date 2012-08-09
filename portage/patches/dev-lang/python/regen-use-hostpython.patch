@@ -1,0 +1,8 @@
+--- Lib/plat-linux2/regen.orig	2012-08-08 17:10:09.106003247 +0100
++++ Lib/plat-linux2/regen	2012-08-08 17:11:10.872647209 +0100
+@@ -5,4 +5,4 @@
+ 	exit 1;;
+ esac
+ set -v
+-python$EXE ../../Tools/scripts/h2py.py -i '(u_long)' /usr/include/sys/types.h /usr/include/netinet/in.h /usr/include/dlfcn.h /usr/include/linux/cdrom.h
++hostpython$EXE ../../Tools/scripts/h2py.py -i '(u_long)' /usr/include/sys/types.h /usr/include/netinet/in.h /usr/include/dlfcn.h /usr/include/linux/cdrom.h

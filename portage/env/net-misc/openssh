@@ -1,0 +1,4 @@
+post_src_prepare() {
+	epatch_user
+        eautoreconf
+}

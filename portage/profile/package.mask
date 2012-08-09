@@ -1,0 +1,4 @@
+# The patches here only apply to python-3 and since epatch_user has no easy
+# way to specify that patches are only for certain major versions the easiest
+# solution is to mask <python-3.
+<dev-lang/python-3

@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "$SYSROOT/usr/bin/xml2-config" --prefix="$SYSROOT/usr" "$@"

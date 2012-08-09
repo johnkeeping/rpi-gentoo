@@ -1,0 +1,2 @@
+sys-devel/gcc -cxx nocxx
+sys-devel/binutils -cxx

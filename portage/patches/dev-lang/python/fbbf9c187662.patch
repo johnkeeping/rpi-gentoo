@@ -1,0 +1,92 @@
+
+# HG changeset patch
+# User Matthias Klose <doko@ubuntu.com>
+# Date 1331836266 -3600
+# Node ID fbbf9c1876625f664928233bd927f4f27bbd6ee3
+# Parent  52597f888e7ab6a075014f1947a18b45a01709d2
+- Issue #14324: Fix configure tests for cross builds.
+
+when using gcc, use a compilation test for the cross build check for long long format.
+
+diff --git a/Misc/NEWS b/Misc/NEWS
+--- a/Misc/NEWS
++++ b/Misc/NEWS
+@@ -111,6 +111,8 @@ Build
+ 
+ - Issue #14321: Do not run pgen during the build if files are up to date.
+ 
++- Issue #14324: Fix configure tests for cross builds.
++
+ Extension Modules
+ -----------------
+ 
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -13805,7 +13805,36 @@ then
+   $as_echo_n "(cached) " >&6
+ else
+   if test "$cross_compiling" = yes; then :
+-  ac_cv_have_long_long_format=no
++  ac_cv_have_long_long_format="cross -- assuming no"
++   if test x$GCC = xyes; then
++    save_CFLAGS=$CFLAGS
++    CFLAGS="$CFLAGS -Werror -Wformat"
++    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++
++        #include <stdio.h>
++        #include <stddef.h>
++
++int
++main ()
++{
++
++      char *buffer;
++      sprintf(buffer, "%lld", (long long)123);
++      sprintf(buffer, "%lld", (long long)-123);
++      sprintf(buffer, "%llu", (unsigned long long)123);
++
++  ;
++  return 0;
++}
++_ACEOF
++if ac_fn_c_try_compile "$LINENO"; then :
++  ac_cv_have_long_long_format=yes
++
++fi
++rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
++    CFLAGS=$save_CFLAGS
++   fi
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -4128,7 +4128,23 @@ then
+   ]]])],
+   [ac_cv_have_long_long_format=yes],
+   [ac_cv_have_long_long_format=no],
+-  [ac_cv_have_long_long_format=no])
++  [ac_cv_have_long_long_format="cross -- assuming no"
++   if test x$GCC = xyes; then
++    save_CFLAGS=$CFLAGS
++    CFLAGS="$CFLAGS -Werror -Wformat"
++    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
++        #include <stdio.h>
++        #include <stddef.h>
++      ]], [[
++      char *buffer;
++      sprintf(buffer, "%lld", (long long)123);
++      sprintf(buffer, "%lld", (long long)-123);
++      sprintf(buffer, "%llu", (unsigned long long)123);
++      ]])],
++      ac_cv_have_long_long_format=yes
++    )
++    CFLAGS=$save_CFLAGS
++   fi])
+   )
+   AC_MSG_RESULT($ac_cv_have_long_long_format)
+ fi
+

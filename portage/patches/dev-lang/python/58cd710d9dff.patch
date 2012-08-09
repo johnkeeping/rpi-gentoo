@@ -1,0 +1,44 @@
+
+# HG changeset patch
+# User Matthias Klose <doko@ubuntu.com>
+# Date 1331840543 -3600
+# Node ID 58cd710d9dffeec32542c71410f1d917e158f619
+# Parent  29ee48f843ec82faef0d0bb183aa59b2b2b3ff9b
+- Issue #14324: Fix configure tests for cross builds.
+
+when configured with --(en|dis)able-ipv6 for cross builds, don't fail the configury due to the missing buggy-getaddrinfo check.
+
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -10854,7 +10854,12 @@ then
+   $as_echo_n "(cached) " >&6
+ else
+   if test "$cross_compiling" = yes; then :
++
++if test "${enable_ipv6+set}" = set; then
++  ac_cv_buggy_getaddrinfo="no -- configured with --(en|dis)able-ipv6"
++else
+   ac_cv_buggy_getaddrinfo=yes
++fi
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -3009,7 +3009,12 @@ int main()
+ ]]])],
+ [ac_cv_buggy_getaddrinfo=no],
+ [ac_cv_buggy_getaddrinfo=yes],
+-[ac_cv_buggy_getaddrinfo=yes]))
++[
++if test "${enable_ipv6+set}" = set; then
++  ac_cv_buggy_getaddrinfo="no -- configured with --(en|dis)able-ipv6"
++else
++  ac_cv_buggy_getaddrinfo=yes
++fi]))
+ fi
+ 
+ AC_MSG_RESULT($ac_cv_buggy_getaddrinfo)
+

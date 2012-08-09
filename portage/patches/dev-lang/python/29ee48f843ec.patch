@@ -1,0 +1,176 @@
+
+# HG changeset patch
+# User Matthias Klose <doko@ubuntu.com>
+# Date 1331837494 -3600
+# Node ID 29ee48f843ec82faef0d0bb183aa59b2b2b3ff9b
+# Parent  fbbf9c1876625f664928233bd927f4f27bbd6ee3
+- Issue #14324: Fix configure tests for cross builds.
+
+when configured --with(out)-computed-gotos for a cross, use this value instead of defaulting to no.
+
+diff --git a/configure b/configure
+--- a/configure
++++ b/configure
+@@ -14022,13 +14022,47 @@ then
+ 
+ fi
+ 
++# Check for --with-computed-gotos
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for --with-computed-gotos" >&5
++$as_echo_n "checking for --with-computed-gotos... " >&6; }
++
++# Check whether --with-computed-gotos was given.
++if test "${with_computed_gotos+set}" = set; then :
++  withval=$with_computed_gotos;
++if test "$withval" = yes
++then
++
++$as_echo "#define USE_COMPUTED_GOTOS 1" >>confdefs.h
++
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
++$as_echo "yes" >&6; }
++fi
++if test "$withval" = no
++then
++
++$as_echo "#define USE_COMPUTED_GOTOS 0" >>confdefs.h
++
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++$as_echo "no" >&6; }
++fi
++
++else
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no value specified" >&5
++$as_echo "no value specified" >&6; }
++fi
++
++
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports computed gotos" >&5
+ $as_echo_n "checking whether $CC supports computed gotos... " >&6; }
+ if ${ac_cv_computed_gotos+:} false; then :
+   $as_echo_n "(cached) " >&6
+ else
+   if test "$cross_compiling" = yes; then :
+-  ac_cv_computed_gotos=no
++  if test "${with_computed_gotos+set}" = set; then
++   ac_cv_computed_gotos="$with_computed_gotos -- configured --with(out)-computed-gotos"
++ else
++   ac_cv_computed_gotos=no
++ fi
+ else
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+@@ -14058,42 +14092,11 @@ fi
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_computed_gotos" >&5
+ $as_echo "$ac_cv_computed_gotos" >&6; }
+-if test "$ac_cv_computed_gotos" = yes
+-then
++case "$ac_cv_computed_gotos" in yes*)
+ 
+ $as_echo "#define HAVE_COMPUTED_GOTOS 1" >>confdefs.h
+ 
+-fi
+-
+-# Check for --with-computed-gotos
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for --with-computed-gotos" >&5
+-$as_echo_n "checking for --with-computed-gotos... " >&6; }
+-
+-# Check whether --with-computed-gotos was given.
+-if test "${with_computed_gotos+set}" = set; then :
+-  withval=$with_computed_gotos;
+-if test "$withval" = yes
+-then
+-
+-$as_echo "#define USE_COMPUTED_GOTOS 1" >>confdefs.h
+-
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+-$as_echo "yes" >&6; }
+-fi
+-if test "$withval" = no
+-then
+-
+-$as_echo "#define USE_COMPUTED_GOTOS 0" >>confdefs.h
+-
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+-$as_echo "no" >&6; }
+-fi
+-
+-else
+-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no value specified" >&5
+-$as_echo "no value specified" >&6; }
+-fi
+-
++esac
+ 
+ case $ac_sys_system in
+ AIX*)
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac
++++ b/configure.ac
+@@ -4239,30 +4239,6 @@ then
+    wide chars that would be converted.])
+ fi
+ 
+-AC_MSG_CHECKING(whether $CC supports computed gotos)
+-AC_CACHE_VAL(ac_cv_computed_gotos,
+-AC_RUN_IFELSE([AC_LANG_SOURCE([[[
+-int main(int argc, char **argv)
+-{
+-    static void *targets[1] = { &&LABEL1 };
+-    goto LABEL2;
+-LABEL1:
+-    return 0;
+-LABEL2:
+-    goto *targets[0];
+-    return 1;
+-}
+-]]])],
+-[ac_cv_computed_gotos=yes],
+-[ac_cv_computed_gotos=no],
+-[ac_cv_computed_gotos=no]))
+-AC_MSG_RESULT($ac_cv_computed_gotos)
+-if test "$ac_cv_computed_gotos" = yes
+-then
+-  AC_DEFINE(HAVE_COMPUTED_GOTOS, 1,
+-  [Define if the C compiler supports computed gotos.])
+-fi
+-
+ # Check for --with-computed-gotos
+ AC_MSG_CHECKING(for --with-computed-gotos)
+ AC_ARG_WITH(computed-gotos,
+@@ -4284,6 +4260,33 @@ fi
+ ],
+ [AC_MSG_RESULT(no value specified)])
+ 
++AC_MSG_CHECKING(whether $CC supports computed gotos)
++AC_CACHE_VAL(ac_cv_computed_gotos,
++AC_RUN_IFELSE([AC_LANG_SOURCE([[[
++int main(int argc, char **argv)
++{
++    static void *targets[1] = { &&LABEL1 };
++    goto LABEL2;
++LABEL1:
++    return 0;
++LABEL2:
++    goto *targets[0];
++    return 1;
++}
++]]])],
++[ac_cv_computed_gotos=yes],
++[ac_cv_computed_gotos=no],
++[if test "${with_computed_gotos+set}" = set; then
++   ac_cv_computed_gotos="$with_computed_gotos -- configured --with(out)-computed-gotos"
++ else
++   ac_cv_computed_gotos=no
++ fi]))
++AC_MSG_RESULT($ac_cv_computed_gotos)
++case "$ac_cv_computed_gotos" in yes*)
++  AC_DEFINE(HAVE_COMPUTED_GOTOS, 1,
++  [Define if the C compiler supports computed gotos.])
++esac
++
+ case $ac_sys_system in
+ AIX*)   
+   AC_DEFINE(HAVE_BROKEN_PIPE_BUF, 1, [Define if the system reports an invalid PIPE_BUF value.]) ;;
+

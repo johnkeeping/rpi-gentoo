@@ -1,0 +1,64 @@
+[[ $(basename $(readlink -f $PORTAGE_CONFIGROOT/etc/make.profile)) == "embedded" ]] && . ${PORTDIR}/profiles/base/profile.bashrc
+
+pre_src_configure() {
+	# If the package depends on perl, then set up suitable environment
+	# variables in case it has native code which needs to be built for
+	# the correct architecture.
+	local perl_version perl_arch
+	perl_version=$(qatom $(portageq match "$SYSROOT" dev-lang/perl) |cut -d' ' -f3)
+	perl_arch=${CHOST%%-*}-linux
+	export PERL_ARCHLIB="$SYSROOT/usr/lib/perl5/$perl_version/$perl_arch"
+	mkdir -p "$WORKDIR/fake_config_lib"
+	export PERL5LIB="$WORKDIR/fake_config_lib"
+	cp "$PERL_ARCHLIB"/Config* "$WORKDIR/fake_config_lib/" ||
+	die "Failed to copy configs to fake config directory: " "$PERL_ARCHLIB"/Config*
+	export PERL_MM_OPT="PERL_ARCHLIB=$PERL_ARCHLIB"
+
+	# Prepend override-bin to PATH, letting us provide wrappers for some
+	# commands that must be run without the perl environment variables
+	# set.
+	export PATH="${PORTAGE_CONFIGROOT}/etc/portage/override-bin:$PATH"
+
+}
+
+post_src_install() {
+	[[ -d ${D} ]] || return 0
+	[[ ${E_MACHINE} == "" ]] && return 0
+	cmdline=""
+	for EM in $E_MACHINE; do
+		cmdline+=" -e ^${EM}[[:space:]]";
+	done
+	output="$( cd ${D} && scanelf -RmyBF%a . | grep -v ${cmdline} )"
+	[[ $output != "" ]] && { echo; echo "* Wrong EM_TYPE. Expected ${E_MACHINE}"; echo -e "${output}"; echo; exit 1; }
+}
+
+# We don't run this on the assumption that when you're
+# emerging binary packages, it's into a runtime ROOT
+# rather than build development ROOT.  The former doesn't
+# want hacking while the latter does.
+if [[ $EBUILD_PHASE == "postinst" ]]; then
+	[[ ${SYSROOT%/} == ${ROOT%/} ]] && cross-fix-root ${CHOST}
+fi
+
+
+# Helper function used by some ebuild-specific bashrc's in env/
+# This allows a bashrc to execute a command from an eclass which is not used
+# by the original ebuild.
+cross_eclass_run() {
+	local eclass=$1
+	shift
+	bash -c ". /usr/lib/portage/bin/isolated-functions.sh
+		unset PERL5LIB PERL_ARCHLIB PERL_MM_OPT
+		inherit() {
+			while test \$# != 0
+			do
+				. /usr/portage/eclass/\$1.eclass
+				shift
+			done
+		}
+		has_version() {
+			portageq has_version \"\$ROOT\" \"\$@\"
+		}
+		. /usr/portage/eclass/$eclass.eclass
+		$*"
+}

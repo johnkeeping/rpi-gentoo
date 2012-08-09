@@ -1,0 +1,16 @@
+#!/bin/bash
+unset PERL_ARCHLIB PERL5LIB PERL_MM_OPT
+_cmd=${0##*/}
+remove_self_from_path() {
+	local -a newpath
+	local selfdir=$(readlink -f "$(cd "$(dirname "$0")"; pwd)")
+	local IFS=:
+	for p in $PATH
+	do
+		p=$(readlink -f "$p")
+		[ "$p" == "$selfdir" ] || newpath+=( "$p" )
+	done
+	echo "${newpath[*]}"
+}
+_cmd=$(PATH="$(remove_self_from_path)" type -p "$_cmd")
+exec "$_cmd" "$@"

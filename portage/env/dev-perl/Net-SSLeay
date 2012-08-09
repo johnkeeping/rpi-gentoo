@@ -1,0 +1,6 @@
+export OPENSSL_PREFIX="$SYSROOT/usr"
+export OPENSSL_VERSION="OpenSSL $(qatom $(portageq match "$SYSROOT" dev-libs/openssl) |cut -d' ' -f3)"
+
+post_src_prepare() {
+	epatch_user
+}

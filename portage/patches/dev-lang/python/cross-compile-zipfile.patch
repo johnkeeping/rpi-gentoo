@@ -1,0 +1,45 @@
+--- Lib/zipfile.py.orig	2012-08-08 16:53:24.212564025 +0100
++++ Lib/zipfile.py	2012-08-08 16:53:48.703434147 +0100
+@@ -74,7 +74,7 @@
+ 
+ # The "central directory" structure, magic number, size, and indices
+ # of entries in the structure (section V.F in the format document)
+-structCentralDir = "<4s4B4HL2L5H2L"
++structCentralDir = b"<4s4B4HL2L5H2L"
+ stringCentralDir = b"PK\001\002"
+ sizeCentralDir = struct.calcsize(structCentralDir)
+ 
+@@ -101,7 +101,7 @@
+ 
+ # The "local file header" structure, magic number, size, and indices
+ # (section V.A in the format document)
+-structFileHeader = "<4s2B4HL2L2H"
++structFileHeader = b"<4s2B4HL2L2H"
+ stringFileHeader = b"PK\003\004"
+ sizeFileHeader = struct.calcsize(structFileHeader)
+ 
+@@ -119,13 +119,13 @@
+ _FH_EXTRA_FIELD_LENGTH = 11
+ 
+ # The "Zip64 end of central directory locator" structure, magic number, and size
+-structEndArchive64Locator = "<4sLQL"
++structEndArchive64Locator = b"<4sLQL"
+ stringEndArchive64Locator = b"PK\x06\x07"
+ sizeEndCentDir64Locator = struct.calcsize(structEndArchive64Locator)
+ 
+ # The "Zip64 end of central directory" record, magic number, size, and indices
+ # (section V.G in the format document)
+-structEndArchive64 = "<4sQ2H2L4Q"
++structEndArchive64 = b"<4sQ2H2L4Q"
+ stringEndArchive64 = b"PK\x06\x06"
+ sizeEndCentDir64 = struct.calcsize(structEndArchive64)
+ 
+@@ -344,7 +344,7 @@
+         if file_size > ZIP64_LIMIT or compress_size > ZIP64_LIMIT:
+             # File is larger than what fits into a 4 byte integer,
+             # fall back to the ZIP64 extension
+-            fmt = '<HHQQ'
++            fmt = b'<HHQQ'
+             extra = extra + struct.pack(fmt,
+                     1, struct.calcsize(fmt)-4, file_size, compress_size)
+             file_size = 0xffffffff
