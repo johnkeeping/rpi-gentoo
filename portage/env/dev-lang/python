@@ -1,3 +1,7 @@
 post_src_prepare() {
+	# Python renamed configure.in to configure.ac between 3.2.3 and 3.2.4;
+	# the patches apply successfully to either version providing the
+	# file name is correct, so just do the rename here first.
+	[ -f configure.in ] && mv configure.in configure.ac
 	epatch_user
 }
