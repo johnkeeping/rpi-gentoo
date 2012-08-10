@@ -19,6 +19,9 @@ pre_src_configure() {
 	# set.
 	export PATH="${PORTAGE_CONFIGROOT}/etc/portage/override-bin:$PATH"
 
+	# intltool needs to use the host perl to run; thankfully the configure
+	# macro allows us to override the perl it uses.
+	export INTLTOOL_PERL=${PORTAGE_CONFIGROOT}/etc/portage/override-bin/cross-run-no-perl
 }
 
 post_src_install() {
