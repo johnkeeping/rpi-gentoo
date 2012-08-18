@@ -1,5 +1,0 @@
-post_src_unpack() {
-	cd "${S}"
-	cross_eclass_run eutils epatch_user || die
-	cross_eclass_run autotools eautoreconf || die
-}
