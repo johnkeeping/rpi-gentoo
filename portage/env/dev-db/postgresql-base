@@ -1,0 +1,4 @@
+pre_pkg_setup() {
+	[[ -n "$(portageq match / '>=app-admin/eselect-postgresql-1.0.10')" ]] ||
+	die "Your build environment does not have eselect-postgresql installed!"
+}

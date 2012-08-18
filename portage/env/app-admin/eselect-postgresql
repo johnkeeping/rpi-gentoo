@@ -1,0 +1,3 @@
+post_src_prepare() {
+	cross_eclass_run eutils epatch_user || die
+}
