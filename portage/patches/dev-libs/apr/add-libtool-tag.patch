@@ -1,0 +1,14 @@
+--- configure.in.orig	2012-08-10 19:14:13.605053535 +0100
++++ configure.in	2012-08-10 19:20:22.408244625 +0100
+@@ -280,9 +280,9 @@
+   [ use_libtool=$withval ], [ use_libtool="yes" ] )
+ 
+ if test "x$use_libtool" = "xyes"; then
+-      lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -o $@ -c $< && touch $@'
++      lt_compile='$(LIBTOOL) $(LTFLAGS) --tag=CC --mode=compile $(COMPILE) -o $@ -c $< && touch $@'
+       LT_VERSION="-version-info `$get_version libtool $version_hdr APR`"
+-      link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(LT_LDFLAGS) \$(COMPILE) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
++      link="\$(LIBTOOL) \$(LTFLAGS) --tag=CC --mode=link \$(LT_LDFLAGS) \$(COMPILE) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
+       so_ext='lo'
+       lib_target='-rpath $(libdir) $(OBJECTS)'
+       export_lib_target='-rpath \$(libdir) \$(OBJECTS)'

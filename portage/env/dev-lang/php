@@ -2,3 +2,8 @@
 # real xml2-config.  This ensures that we use the correct include and library
 # paths.
 export ac_cv_php_xml2_config_path="$SYSROOT/etc/portage/scripts/xml2-config"
+
+pre_src_configure() {
+	use apache2 && EXTRA_ECONF="${EXTRA_ECONF} --with-apxs2=$SYSROOT/usr/sbin/apxs"
+	use unicode && EXTRA_ECONF="${EXTRA_ECONF} --with-onig=$SYSROOT/usr"
+}

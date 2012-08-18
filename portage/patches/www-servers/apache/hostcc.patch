@@ -1,0 +1,57 @@
+--- configure.in.orig	2012-08-10 23:40:47.895998572 +0100
++++ configure.in	2012-08-10 23:44:46.414907836 +0100
+@@ -150,6 +150,11 @@
+ AC_PROG_CC
+ AC_PROG_CPP
+ 
++AC_CHECK_PROGS([BUILDCC], [${build_alias}-gcc ${build_alias}-cc gcc cc])
++if test "x$BUILDCC" = "x"; then
++    AC_MSG_ERROR([Failed to find build cc])
++fi
++
+ if test "x${cache_file}" = "x/dev/null"; then
+   # Likewise, ensure that CC and CPP are passed through to the pcre
+   # configure script iff caching is disabled (the autoconf 2.5x default).
+@@ -640,7 +640,7 @@
+ fi
+ 
+ APACHE_FAST_OUTPUT(Makefile modules/Makefile srclib/Makefile) 
+-APACHE_FAST_OUTPUT(os/Makefile server/Makefile)
++APACHE_FAST_OUTPUT(os/Makefile)
+ APACHE_FAST_OUTPUT(support/Makefile srclib/pcre/Makefile)
+ 
+ if test -d ./test; then
+@@ -708,7 +708,8 @@
+ HTTPD_VERSION=`$abs_srcdir/build/get-version.sh all $abs_srcdir/include/ap_release.h AP_SERVER`
+ AC_SUBST(HTTPD_VERSION)
+ 
+-AC_OUTPUT($APACHE_OUTPUT_FILES docs/conf/httpd.conf docs/conf/extra/httpd-autoindex.conf docs/conf/extra/httpd-dav.conf docs/conf/extra/httpd-default.conf docs/conf/extra/httpd-info.conf docs/conf/extra/httpd-languages.conf docs/conf/extra/httpd-manual.conf docs/conf/extra/httpd-mpm.conf docs/conf/extra/httpd-multilang-errordoc.conf docs/conf/extra/httpd-ssl.conf docs/conf/extra/httpd-userdir.conf docs/conf/extra/httpd-vhosts.conf include/ap_config_layout.h support/apxs support/apachectl support/dbmmanage support/envvars-std support/log_server_status support/logresolve.pl support/phf_abuse_log.cgi support/split-logfile build/rules.mk build/pkg/pkginfo build/config_vars.sh,[true],[
++touch server/.deps
++AC_OUTPUT($APACHE_OUTPUT_FILES docs/conf/httpd.conf docs/conf/extra/httpd-autoindex.conf docs/conf/extra/httpd-dav.conf docs/conf/extra/httpd-default.conf docs/conf/extra/httpd-info.conf docs/conf/extra/httpd-languages.conf docs/conf/extra/httpd-manual.conf docs/conf/extra/httpd-mpm.conf docs/conf/extra/httpd-multilang-errordoc.conf docs/conf/extra/httpd-ssl.conf docs/conf/extra/httpd-userdir.conf docs/conf/extra/httpd-vhosts.conf include/ap_config_layout.h support/apxs support/apachectl support/dbmmanage support/envvars-std support/log_server_status support/logresolve.pl support/phf_abuse_log.cgi support/split-logfile build/rules.mk build/pkg/pkginfo build/config_vars.sh server/Makefile,[true],[
+   APACHE_GEN_MAKEFILES
+ ])
+ 
+--- server/Makefile.in.orig	2012-08-10 23:45:13.051675995 +0100
++++ server/Makefile.in	2012-08-10 23:48:07.671150299 +0100
+@@ -1,3 +1,9 @@
++top_srcdir = @top_srcdir@
++top_builddir = @top_builddir@
++srcdir = @srcdir@
++builddir = @builddir@
++VPATH = @srcdir@
++BUILDCC = @BUILDCC@
+ 
+ CLEAN_TARGETS = gen_test_char test_char.h \
+ 	ApacheCoreOS2.def httpd.exp export_files \
+@@ -21,9 +27,8 @@
+ include $(top_builddir)/build/rules.mk
+ include $(top_srcdir)/build/library.mk
+ 
+-gen_test_char_OBJECTS = gen_test_char.lo
+-gen_test_char: $(gen_test_char_OBJECTS)
+-	$(LINK) $(EXTRA_LDFLAGS) $(gen_test_char_OBJECTS) $(EXTRA_LIBS)
++gen_test_char: gen_test_char.c
++	$(BUILDCC) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(EXTRA_INCLUDES) $(CPPFLAGS) $(EXTRA_LDFLAGS) gen_test_char.c $(EXTRA_LIBS) -o $@
+ 
+ test_char.h: gen_test_char
+ 	./gen_test_char > test_char.h

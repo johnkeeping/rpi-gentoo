@@ -1,0 +1,6 @@
+EXTRA_ECONF=--with-apr=${SYSROOT}/usr/bin/apr-1-config
+
+pre_src_prepare() {
+	# Let src_prepare call eautoreconf for us.
+	epatch_user
+}

@@ -1,0 +1,22 @@
+EXTRA_ECONF="--with-apr=$SYSROOT/usr/bin/apr-1-config
+	--with-apr-util=$SYSROOT/usr
+	--with-pcre=$SYSROOT/usr
+	--with-z=$SYSROOT/usr
+	ap_cv_void_ptr_lt_long=no"
+
+pre_src_prepare() {
+	# Let apache-2_src_prepare do the eautoreconf for us.
+	epatch_user
+}
+
+pre_src_configure() {
+	use ssl && EXTRA_ECONF="${EXTRA_ECONF} --with-ssl=$SYSROOT/usr"
+}
+
+post_src_install() {
+	sed -i -e '/\$installbuilddir =/ s:"/usr:"'"$SYSROOT"'/usr:' \
+		"${D}/usr/sbin/apxs"
+	sed -i	-e '/^includedir =/ s: /usr: '"$SYSROOT"'/usr:' \
+		-e '/^sbindir =/ s: /usr: '"$SYSROOT"'/usr:' \
+		"${D}/usr/lib/apache2/build/config_vars.mk"
+}

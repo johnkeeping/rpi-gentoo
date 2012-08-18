@@ -1,0 +1,20 @@
+--- configure.in.orig	2012-08-10 20:41:20.735712444 +0100
++++ configure.in	2012-08-10 20:41:35.112593732 +0100
+@@ -40,6 +40,7 @@
+ 
+ AC_CANONICAL_SYSTEM
+ 
++AC_PROG_CC
+ AC_PROG_INSTALL
+ 
+ # Use -no-install to link the test programs on all platforms
+--- Makefile.in.orig	2012-08-10 20:44:37.341091027 +0100
++++ Makefile.in	2012-08-10 20:44:44.426032652 +0100
+@@ -2,6 +2,7 @@
+ # Top-level Makefile for APRUTIL
+ #
+ CPP = @CPP@
++CC = @CC@
+ 
+ # gets substituted into some targets
+ APRUTIL_MAJOR_VERSION=@APRUTIL_MAJOR_VERSION@
