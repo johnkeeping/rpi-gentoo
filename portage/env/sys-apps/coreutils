@@ -1,0 +1,18 @@
+pre_src_compile() {
+	[[ $PV = 8.20 ]] || return
+
+	# Commands from: http://cross-lfs.org/view/svn/x86_64-64/temp-system/coreutils.html
+	sed -e '/src_make_prime_list/d' -i Makefile
+	depbase=`echo src/make-prime-list.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+	    gcc -m64 -std=gnu99  -I. -I./lib  -Ilib -I./lib -Isrc -I./src \
+	    -fdiagnostics-show-option -funit-at-a-time -g -O2 -MT \
+	    src/make-prime-list.o -MD -MP -MF $depbase.Tpo -c -o src/make-prime-list.o \
+	    src/make-prime-list.c &&
+	mv -f $depbase.Tpo $depbase.Po
+	gcc -m64 -std=gnu99 -fdiagnostics-show-option -funit-at-a-time -g -O2 \
+	    -Wl,--as-needed  -o src/make-prime-list src/make-prime-list.o
+
+	sed -e '/hostname.1/d
+		/uname.1/d
+		/arch.1/d' -i Makefile
+}
