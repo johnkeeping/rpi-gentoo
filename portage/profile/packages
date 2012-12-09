@@ -37,6 +37,7 @@
 #*sys-devel/make
 #*>=sys-devel/patch-2.6.1
 *sys-fs/e2fsprogs
+*sys-libs/timezone-data
 *virtual/dev-manager
 *virtual/editor
 *virtual/libc
