@@ -1,0 +1,8 @@
+post_src_prepare() {
+	epatch_user
+	eautoreconf
+}
+
+pre_src_configure() {
+	EXTRA_ECONF="$EXTRA_ECONF guile_cv_pthread_attr_get_stack_works=1"
+}

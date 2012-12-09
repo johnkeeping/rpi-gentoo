@@ -1,0 +1,29 @@
+pre_src_configure() {
+	EXTRA_ECONF="$EXTRA_ECONF --with-libxml2=$SYSROOT
+		--with-libguile=$SYSROOT
+		--with-libregex=yes
+		--with-regex-header=regex.h
+		libopts_cv_with_libregex=yes
+		--with-libregex-cflags=yes --with-libregex-libs=yes"
+	# Instead of using the build binaries (with the wrong architecture),
+	# use the ones on the build system.
+	sed -e 's:^AGexe=.*$:AGexe=/usr/bin/autogen:' \
+	    -e 's:^CLexe=.*$:CLexe=/usr/bin/columns:' \
+	    -e 's:^GDexe=.*$:GDexe=/usr/bin/getdefs:' \
+	    -i configure.ac configure
+
+	# Replace the set_exe_var() function with a no-op since we know that
+	# the necessary environment variables are already exported (see
+	# pre_src_compile) and letting the default implementation run will
+	# overwrite our variables with the binaries in the build tree, which
+	# are for the wrong architecture.
+	sed -e '/set_exe_var()/,/^}/ c\
+set_exe_var() { : ; }' -i agen5/bootstrap.dir
+}
+
+pre_src_compile() {
+	AGexe=/usr/bin/autogen
+	CLexe=/usr/bin/columns
+	GDexe=/usr/bin/getdefs
+	export AGexe CLexe GDexe
+}

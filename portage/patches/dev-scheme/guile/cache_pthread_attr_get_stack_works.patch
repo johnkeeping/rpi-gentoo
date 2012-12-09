@@ -1,0 +1,35 @@
+--- configure.in.orig	2012-11-11 13:54:13.668459429 +0000
++++ configure.in	2012-11-11 13:57:27.612835819 +0000
+@@ -1368,8 +1368,9 @@
+ 
+ if test "$with_threads" = pthreads; then
+ 
+-AC_MSG_CHECKING(whether pthread_attr_getstack works for the main thread)
+-old_CFLAGS="$CFLAGS"
++AC_CACHE_CHECK([whether pthread_attr_getstack works for the main thread],
++	[guile_cv_pthread_attr_get_stack_works],
++	[old_CFLAGS="$CFLAGS"
+ CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
+ AC_RUN_IFELSE([AC_LANG_SOURCE([[
+ #if HAVE_PTHREAD_ATTR_GETSTACK
+@@ -1397,12 +1398,15 @@
+ }
+ #endif
+ ]])],
+-[works=yes
+-AC_DEFINE(PTHREAD_ATTR_GETSTACK_WORKS, [1], [Define when pthread_att_get_stack works for the main thread])],
+-[works=no],
++[guile_cv_pthread_attr_get_stack_works=yes],
++[guile_cv_pthread_attr_get_stack_works=no],
+ [])
+-CFLAGS="$old_CFLAGS"
+-AC_MSG_RESULT($works)
++CFLAGS="$old_CFLAGS"])
++AC_MSG_RESULT($guile_cv_pthread_attr_get_stack_works)
++
++if test "x$guile_cv_pthread_attr_get_stack_works" = xyes; then
++	AC_DEFINE(PTHREAD_ATTR_GETSTACK_WORKS, [1], [Define when pthread_att_get_stack works for the main thread])
++fi
+ 
+ fi # with_threads=pthreads
+ 
