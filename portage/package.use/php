@@ -1,2 +1,2 @@
 www-servers/apache -threads
-dev-lang/php apache2 pcntl
+dev-lang/php apache2 curl pcntl
