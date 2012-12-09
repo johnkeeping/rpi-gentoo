@@ -7,4 +7,8 @@ dev-lang/php phar
 # Git only works with Python 2, which is masked.
 dev-vcs/git python
 
+# The documentation build requires a custom tool which doesn't work with
+# cross compilation.
+mail-client/mutt doc
+
 sys-apps/busybox make-symlinks

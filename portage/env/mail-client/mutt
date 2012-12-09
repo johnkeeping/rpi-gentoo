@@ -1,0 +1,17 @@
+pre_src_compile() {
+	# Some tools are compiled to run during the build.  By compiling
+	# these manually here they should be new enough that make will not
+	# rebuild them using the "wrong" compiler.
+	gcc -c -std=c99 -DMD5UTIL -DHAVE_STDINT_H -o mutt_md5-md5.o md5.c &&
+	gcc -o mutt_md5 mutt_md5-md5.o || die
+
+	# This one lives in a subdirectory, so do it in a subshell.
+	(
+		cd doc &&
+		gcc -c -DSYSCONFDIR=\"/etc/mutt\" -DBINDIR=\"/usr/bin\" \
+			-DHAVE_STRERROR=1 -DSTDC_HEADERS=1 \
+			-DHAVE_UNISTD_H=1 -DHAVE_GETOPT_H=1 \
+			-o makedoc.o makedoc.c &&
+		gcc -o makedoc makedoc.o
+	) || die
+}
