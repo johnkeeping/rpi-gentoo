@@ -1,0 +1,5 @@
+pre_src_configure() {
+	EXTRA_ECONF="--with-pth-prefix=$SYSROOT/usr
+			--with-ksba-prefix=$SYSROOT/usr
+			--with-libassuan-prefix=$SYSROOT/usr"
+}
