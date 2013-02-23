@@ -10,6 +10,7 @@ pre_src_prepare() {
 }
 
 pre_src_configure() {
+	export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
 	use ssl && EXTRA_ECONF="${EXTRA_ECONF} --with-ssl=$SYSROOT/usr"
 }
 
