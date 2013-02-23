@@ -1,6 +1,6 @@
---- configure.ac.orig	2012-08-08 17:50:18.235106676 +0100
-+++ configure.ac	2012-08-08 17:52:11.939712845 +0100
-@@ -1099,13 +1099,6 @@
+--- configure.ac.orig	2013-02-23 16:36:55.652549164 +0000
++++ configure.ac	2013-02-23 16:37:42.631884844 +0000
+@@ -1100,13 +1100,6 @@
  		saved_CPPFLAGS="$CPPFLAGS"
  		saved_LDFLAGS="$LDFLAGS"
  		save_LIBS="$LIBS"
@@ -14,13 +14,7 @@
  		LIBS="$LIBS -lz"
  		AC_TRY_LINK_FUNC([deflate], [AC_DEFINE([HAVE_LIBZ])],
  			[
-@@ -2105,18 +2098,11 @@
- 		fi
- 	]
- )
--LIBS="-L/usr/lib -lssl -lcrypto   $LIBS"
-+LIBS="-lssl -lcrypto   $LIBS"
- AC_TRY_LINK_FUNC([RAND_add], [AC_DEFINE([HAVE_OPENSSL], [1],
+@@ -2112,13 +2105,6 @@
  	[Define if your ssl headers are included
  	with #include <openssl/header.h>])],
  	[
