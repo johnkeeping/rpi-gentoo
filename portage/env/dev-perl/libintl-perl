@@ -1,0 +1,15 @@
+# Our custom MakeMaker environment doesn't propagate to the gettext_xs
+# subdirectory properly when run through the top-level Makefile.PL so
+# we regenerate the makefile in gettext_xs explicitly here.
+post_src_configure() {
+	(
+		cd gettext_xs
+		set -- \
+			PREFIX=${EPREFIX}/usr \
+			INSTALLDIRS=vendor \
+			INSTALLMAK3DIR=none \
+			DESTDIR="${D}"
+		perl Makefile.PL "$@" <<< "${pm_echovar}" ||
+			die "Unable to build!"
+	)
+}
